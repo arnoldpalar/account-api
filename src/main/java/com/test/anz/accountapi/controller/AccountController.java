@@ -33,8 +33,7 @@ public class AccountController {
     }
 
     @GetMapping(value = "/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Account> getAccount(
-            @PathVariable String accountNumber) {
+    public ResponseEntity<Account> getAccount(@PathVariable String accountNumber) {
         return accountService.getAccount(accountNumber)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

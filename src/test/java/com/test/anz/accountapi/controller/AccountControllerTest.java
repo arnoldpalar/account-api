@@ -1,9 +1,11 @@
 package com.test.anz.accountapi.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.anz.accountapi.entity.Account;
 import com.test.anz.accountapi.entity.AccountTransaction;
 import com.test.anz.accountapi.service.AccountService;
 import com.test.anz.accountapi.service.AccountTransactionService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +33,18 @@ public class AccountControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    AccountService accountService;
+    private AccountService accountService;
 
     @MockBean
-    AccountTransactionService accountTransactionService;
+    private AccountTransactionService accountTransactionService;
 
     @BeforeEach
     void setup() {
         Account account = new Account()
-                .withUserId("")
-                .withAccountNumber("")
-                .withAccountName("")
-                .withAccountType("")
+                .withUserId("USER_ID")
+                .withAccountNumber("ACCOUNT_NUMBER")
+                .withAccountName("ACCOUNT_NAME")
+                .withAccountType("ACCOUNT_TYPE")
                 .withBalance(BigDecimal.ZERO)
                 .withBalanceDate(new Date());
 
@@ -69,13 +71,40 @@ public class AccountControllerTest {
 
     @Test
     void when_GetAccounts_given_ValidParameters_then_ReturnAccount() throws Exception {
-        mockMvc.perform(get("/accounts/")
-                    .header("User-ID", "userId")
-                    .param("page", "0")
-                    .param("size", "0")
-                    .param("direction", "ASC")
-                    .param("sortBy", "sortBy"))
+        String res = mockMvc.perform(get("/accounts/")
+                        .header("User-ID", "userId")
+                        .param("page", "0")
+                        .param("size", "0")
+                        .param("direction", "ASC")
+                        .param("sortBy", "sortBy"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertNotNull(res);
+    }
+
+    @Test
+    void when_GetAccount_given_ValidParameters_then_ReturnAccount() throws Exception {
+        String res = mockMvc.perform(get("/accounts/A_ACCOUNT_NUMBER"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertNotNull(new ObjectMapper().readValue(res, Account.class));
+    }
+
+    @Test
+    void when_GetAccountTransactions_given_ValidParameters_then_ReturnAccount() throws Exception {
+        String res = mockMvc.perform(get("/accounts/A_ACCOUNT_NUMBER/transactions")
+                        .param("page", "0")
+                        .param("size", "0")
+                        .param("direction", "ASC")
+                        .param("sortBy", "sortBy"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertNotNull(res);
     }
 }
